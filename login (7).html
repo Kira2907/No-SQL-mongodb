@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Form</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <form action="http://localhost:4000/add-expenses" class="border border-primary p-4 rounded">
+      <h1>Login</h1>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email">
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      <a href="http://localhost:4000">New user?</a>
+      <a href="http://localhost:4000/forgot-password">forgot password?</a>
+    </form>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <script>
+  const form = document.querySelector("form");
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = document.querySelector("#email").value;
+  const password = document.querySelector("#password").value;
+
+    const data = {
+    email,
+    password,
+  };
+
+  try {
+    const response = await axios.post("http://localhost:4000/login", data );
+    if (response.data.message === "User not found") {
+      alert("User not found");
+    } else if (response.data.message === "User not authorized") {
+      alert("Enter correct password");
+    } else{
+      const userId = response.data.userId;
+      localStorage.setItem("userId", userId.toString());
+      
+      console.log(response.data);
+      window.location.href = "/add-expenses";
+    }           
+  } catch (error) {
+    console.log(error);
+  }
+
+  form.reset();
+});
+ 
+  </script>
+</body>
+</html>

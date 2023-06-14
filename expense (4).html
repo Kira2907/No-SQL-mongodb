@@ -1,0 +1,156 @@
+<!doctype html>
+<html> 
+ <head> 
+  <title>Expense tracker</title> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> 
+  <style>
+      .centered-form {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+  </style> 
+ </head> 
+ <body> 
+  <div class="container"> 
+   <div class="row centered-form"> 
+    <div class="col-md-6"> 
+      <form class="mb-3"> 
+        <h1>Expense Tracker App</h1>  
+        <div class="form-group"> <label for="expense">Expense Amount</label> 
+         <input type="number" class="form-control" id="expense" placeholder="Enter expense amount" required> 
+        </div> 
+        <div class="form-group"> <label for="description">Expense Description</label> 
+         <input type="text" class="form-control" id="description" placeholder="Enter expense description" required> 
+        </div> 
+        <div class="form-group"> <label for="category">Expense Category</label> <select class="form-control" id="category" required>
+           <option value="">Select expense category</option> 
+           <option value="food">Food</option> <option value="movie">Movie</option> 
+           <option value="fuel">fuel</option>
+           <option value="travel">Travel</option> </select> 
+        </div>
+        <input type="hidden" id="userId" name="userId" value=""> 
+        <button type="submit" class="btn btn-primary">Add Expense</button> 
+        <button id="showLeaderboardButton" class="btn btn-primary">Show Leaderboard</button>
+       </form> 
+    </div> 
+   </div> 
+   <h2 class="text-center mt-5">EXPENSES:</h2> 
+   <div class="row mt-3"> 
+    <div class="col-md-6 mx-auto"> 
+     <div class="list-group" id="userList"></div> 
+    </div> 
+   </div> 
+  </div> 
+  <h2 class="text-center mt-5">LEADER BOARD:</h2> 
+  <div class="row mt-3"> 
+    <div class="col-md-6 mx-auto"> 
+      <div id="leaderboard"></div> 
+    </div> 
+   </div> 
+  </div> 
+  <div id="paginationLinks"></div> 
+ 
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> 
+  
+<script>
+const form = document.querySelector("form");
+
+const userList = document.getElementById("userList");
+
+const userId = parseInt(localStorage.getItem("userId"));
+document.getElementById("userId").value = userId;
+
+async function getUsers() {
+  try {
+    const response = await axios.get(`http://localhost:4000/expenses?userId=${userId}`);
+    const users = response.data;
+    users.forEach(user => {
+      addUserToList(user);
+      });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+getUsers(); 
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+ 
+  const amount = parseInt(document.getElementById("expense").value);
+  const description = document.getElementById("description").value;
+  const category = document.getElementById("category").value;
+  const userId = document.getElementById("userId").value;  
+  const user = { amount, description, category, userId };
+
+  addUserToList(user);
+
+  try {
+      const response = await axios.post('http://localhost:4000/expenses', user );
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
+
+  form.reset();
+});
+
+function addUserToList(user) {
+  const listItem = document.createElement("li");
+  listItem.className = "list-group-item";
+  const id = user.id;
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "btn btn-danger float-right ml-2";
+  deleteButton.innerHTML = "Delete";
+  deleteButton.addEventListener("click", async () => {
+    listItem.remove();
+
+    try {
+      const response = await axios.delete(`http://localhost:4000/expenses/${parseInt(id)}?userId=${userId}`);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+
+  });
+
+  const textNode = document.createTextNode(
+    `${user.amount} - ${user.description} - ${user.category}`
+  );
+  
+  listItem.appendChild(deleteButton);
+  listItem.appendChild(textNode);
+
+  userList.appendChild(listItem);
+}
+
+const showLeaderboardButton = document.getElementById("showLeaderboardButton");
+showLeaderboardButton.addEventListener("click", fetchLeaderboard);
+
+async function fetchLeaderboard() {
+  try {
+    const response = await axios.get("http://localhost:4000/leaderboard");
+    const leaderboardData = response.data;
+    displayLeaderboard(leaderboardData);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function displayLeaderboard(leaderboardData) {
+  const leaderboardContainer = document.getElementById("leaderboard");
+  leaderboardContainer.innerHTML = "";
+
+  leaderboardData.forEach((user) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = `${user.name} - Total Expenses: ${user.totalExpense}`;
+    leaderboardContainer.appendChild(listItem);
+  });
+}
+
+</script></body></html> 

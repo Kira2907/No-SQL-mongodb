@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Signup Form</title> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css"> 
+ </head> 
+ <body> 
+  <div class="container"> 
+   <form class="border border-primary p-4 rounded"> 
+      <h1>Create an account</h1> 
+    <div class="form-group"> <label for="name">Name:</label> 
+     <input type="text" class="form-control" id="name" name="name" required placeholder="Enter your name"> 
+    </div> 
+    <div class="form-group"> <label for="email">Email:</label> 
+     <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email"> 
+    </div> 
+    <div class="form-group"> <label for="password">Password:</label> 
+     <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password"> 
+    </div> <button type="submit" class="btn btn-primary">Sign Up</button> 
+   </form> 
+  </div> 
+  <a href="http://localhost:4000/login">Existing user?Login now.</a>
+  <script src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js'></script>
+  <script> 
+    const form = document.querySelector("form");
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+    
+      const name = document.querySelector("#name").value;
+      const email = document.querySelector("#email").value;
+      const password = document.querySelector("#password").value;
+    
+      const data = {
+        name,
+        email,
+        password,
+      };
+    
+      try {
+        const response = await axios.post("http://localhost:4000/sign-up", data);
+        console.log(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+      form.reset();
+    });
+   </script>
+ </body>
+</html>
